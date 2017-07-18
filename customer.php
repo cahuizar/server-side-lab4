@@ -18,9 +18,6 @@ class Customer {
     private $password;
     private $passwordConfirm;
     private $department;
-    private $gender;
-    private $status;
-    private $terms;
 
     function __construct() {
         $this->fName = "";
@@ -30,9 +27,6 @@ class Customer {
         $this->password = "";
         $this->passwordConfirm = "";
         $this->department = "";
-        $this->gender = "";
-        $this->status = "";
-        $this->terms = "";
     }
 
     public function setFName($fName) {
@@ -90,31 +84,6 @@ class Customer {
     public function getDepartment() {
         return $this->department;
     }
-
-    public function setGender($gender) {
-        $this->gender = $gender;
-    }
-
-    public function getGender() {
-        return $this->gender;
-    }
-
-    public function setStatus($status) {
-        $this->status = $status;
-    }
-
-    public function getStatus() {
-        return $this->status;
-    }
-
-    public function setTerms($terms) {
-        $this->terms = $terms;
-    }
-
-    public function getTerms() {
-        return $this->terms;
-    }
-
 }
 
  ?>

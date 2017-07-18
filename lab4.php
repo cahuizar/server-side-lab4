@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-TITLE: Lab 3
+TITLE: Lab 4
 AUTHOR: Carlos Huizar
 File Name: lab3.php
 ORIGINALLY CREATED ON: 07/16/2017
@@ -9,15 +9,29 @@ ORIGINALLY CREATED ON: 07/16/2017
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Contact - Carlos Huizar</title>
+	<title>Register</title>
 	<link rel="stylesheet" type="text/css" href="css/style.css">
 	<link rel="stylesheet" type="text/css" href="css/mobile.css" media="screen and (max-width : 568px)">
 </head>
 <body>
 	<?php
 		require('customer.php');
-		$fNameErr = $lNameErr = $emailErr = $emailConfirmErr = $passwordErr = $passwordConfirmErr = $termsErr = "";
+		$fNameErr = $lNameErr = $emailErr = $emailConfirmErr = $passwordErr = $passwordConfirmErr = "";
 		$customer = new Customer();
+
+		$servername = "localhost";
+		$username = "username";
+		$password = "password";
+
+		// Create connection
+		$conn = new mysqli($servername, $username, $password);
+
+		// Check connection
+		if ($conn->connect_error) {
+			die("Connection failed: " . $conn->connect_error);
+		} 
+		$sql = "SELECT departmentName FROM Department";
+		$depName = $conn->query($sql);
 
 		// do the following when the submit button on the form is clicked
 		if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -28,10 +42,7 @@ ORIGINALLY CREATED ON: 07/16/2017
 			$customer->setEmailConfirm(filter_input(INPUT_POST, 'confirmEmail'));
 			$customer->setPassword(filter_input(INPUT_POST, 'password'));
 			$customer->setPasswordConfirm(filter_input(INPUT_POST, 'confirmPassword'));
-			$customer->setGender(filter_input(INPUT_POST, 'gender'));
 			$customer->setDepartment(filter_input(INPUT_POST, 'department'));
-			$customer->setStatus($_POST['status']);
-			$customer->setTerms(filter_input(INPUT_POST, 'terms'));
 
 			// use boolean to stop page from loading the next page
 			$errorFound = false;
@@ -90,33 +101,18 @@ ORIGINALLY CREATED ON: 07/16/2017
 				$passwordConfirmErr = "";
 			}
 
-			// error if the  user does not agree to the terms and conditions
-			$terms = $customer->getTerms();
-			if (empty($terms)) {
-				$termsErr = "You must agree to the terms and conditions";
-				$errorFound = true;
-			} else {
-				$termsErr = "";
-			}
-
 			// do the following if no errors are found on the form
 			if ($errorFound == false){
-				session_start();
+				$department = $customer->getDepartment();
+				$sql = "SELECT departmentId FROM Department WHERE departmentName = " . $department .;
+				$departmentId= $conn->query($sql);
 
-				// store input text in session so that it can be used on display.php
-				$_SESSION['fName'] = $customer->getFName();
-				$_SESSION['lName'] = $customer->getLName();
-				$_SESSION['email'] = $customer->getEmail();
-				$_SESSION['confirmEmail'] = $customer->getEmailConfirm();
-				$_SESSION['password'] = $customer->getPassword();
-				$_SESSION['confirmPassword'] = $customer->getPasswordConfirm();
-				$_SESSION['gender'] = $customer->getGender();
-				$_SESSION['department'] = $customer->getDepartment();
-				$_SESSION['status'] = $customer->getStatus();
-				$_SESSION['terms'] = $customer->getTerms();
-
-				// go to display.php
-				header("Location: display.php");
+				$sql = "INSERT INTO Users (email, password, fName, lName, departmentId)
+						VALUES (, '. $email .', '. $password .','. $fName .', '. $lName .', '. $departmentId .')";
+				$conn->query($sql);
+				$conn->close();
+				// go to login.php
+				header("Location: login.php");
 				exit();
 			}
 
@@ -142,19 +138,18 @@ ORIGINALLY CREATED ON: 07/16/2017
             <label>Confirm Email: </label><br /><span class="error"><?php echo $emailConfirmErr;?></span><br /><input type="email" name="confirmEmail" id="confirmEmail" /><br />
 			<label>Password<span class="required">*</span>: </label><br /><span class="error"><?php echo $passwordErr;?></span><br /><input type="password" name="password" id="password" /><br />
             <label>Confirm Password: </label><br /><span class="error"><?php echo $passwordConfirmErr;?></span><br /><input type="password" name="confirmPassword" id="confirmPassword" /><br />
-            <label>What is your gender? </label><br /><br /><br /><input type="radio" name="gender" value="male" checked> Male<br />
-            <input type="radio" name="gender" value="female"> Female<br>
             <label>Department: </label><br /><br />
             <select name="department">
-             <option value="Computer Science">Computer Science</option>
-             <option value="Computer Engineering">Computer Engineering</option>
-             <option value="Arts">Arts</option>
+            <?php
+				while($selected = $depName->fetch_assoc()) {
+        			<option value="$selected">$selected</option>
+    			}
+             ?>
+             <!--<option value="Mens">Mens</option>
+             <option value="Womens">Womens</option>
+             <option value="Shoes">Shoes</option>-->
             </select><br  />
-            <label>Current Status? </label><br /><br /><br />
-            <input type="checkbox" name="status[]" value="Student" checked>Student<br />
-            <input type="checkbox" name="status[]" value="Faculty">Faculty<br />
-            <input type="checkbox" name="status[]" value="Staff">Staff<br />
-            <input type="checkbox" name="terms" value="agreed" > I agree to the Terms and Policies<br /><span class="error"><?php echo $termsErr;?></span><br />
+        
 			<!-- submit button -->
 			<input type="submit" name="submit" value="Submit">
 		</form>
