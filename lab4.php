@@ -19,19 +19,17 @@ ORIGINALLY CREATED ON: 07/16/2017
 		$fNameErr = $lNameErr = $emailErr = $emailConfirmErr = $passwordErr = $passwordConfirmErr = "";
 		$customer = new Customer();
 
-		$servername = "localhost";
-		$username = "username";
-		$password = "password";
+		$dsn = 'mysql:host=localhost;dbname=cahuizar_db';
+		$username = "cahuizar";
+		$password = "server123";
+		$conn = new PDO($dsn, $username, $password);
 
-		// Create connection
-		$conn = new mysqli($servername, $username, $password);
 
-		// Check connection
-		if ($conn->connect_error) {
-			die("Connection failed: " . $conn->connect_error);
-		} 
 		$sql = "SELECT departmentName FROM Department";
-		$depName = $conn->query($sql);
+		$depName = $conn->prepare($sql);
+		$depName->execute();
+		$rows = $depName->fetchAll();
+		$depName->closeCursor();
 
 		// do the following when the submit button on the form is clicked
 		if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -104,13 +102,22 @@ ORIGINALLY CREATED ON: 07/16/2017
 			// do the following if no errors are found on the form
 			if ($errorFound == false){
 				$department = $customer->getDepartment();
-				$sql = "SELECT departmentId FROM Department WHERE departmentName = " . $department .;
-				$departmentId= $conn->query($sql);
-
-				$sql = "INSERT INTO Users (email, password, fName, lName, departmentId)
-						VALUES (, '. $email .', '. $password .','. $fName .', '. $lName .', '. $departmentId .')";
-				$conn->query($sql);
-				$conn->close();
+				$sql = "SELECT departmentId FROM Department WHERE departmentName = :department";
+				$departmentId = $conn->prepare($sql);
+				$departmentId->bindValue(":department", $department);
+				$departmentId->execute();
+				$temp = $departmentId->fetchAll();
+				$id = "MENS";
+				$departmentId->closeCursor();
+				$sql = "INSERT INTO User (email, password, fName, lName, departmentId) VALUES (:email, :password, :fName, :lName, :departmentId)";
+				$statement = $conn->prepare($sql);
+				$statement->bindValue(":email", $email);
+				$statement->bindValue(":password", $password);
+				$statement->bindValue(":fName", $fName);
+				$statement->bindValue(":lName", $lName);
+				$statement->bindValue(":departmentId", $id);
+				$statement->execute();
+        		$statement->closeCursor();
 				// go to login.php
 				header("Location: login.php");
 				exit();
@@ -141,15 +148,12 @@ ORIGINALLY CREATED ON: 07/16/2017
             <label>Department: </label><br /><br />
             <select name="department">
             <?php
-				while($selected = $depName->fetch_assoc()) {
-        			<option value="$selected">$selected</option>
+				foreach($rows as $selected) {
+        			echo "<option value='". $selected['departmentName'] ."'>". $selected['departmentName'] ."</option>";
     			}
              ?>
-             <!--<option value="Mens">Mens</option>
-             <option value="Womens">Womens</option>
-             <option value="Shoes">Shoes</option>-->
             </select><br  />
-        
+
 			<!-- submit button -->
 			<input type="submit" name="submit" value="Submit">
 		</form>

@@ -5,11 +5,11 @@ File Name: display.php
 ORIGINALLY CREATED ON: 06/30/2017
 -->
 <?php
+	session_start();
 	if($_SESSION['isLoggedIn'] == "yes") {
-		session_start();
 
 		$email = $_SESSION['email'];
-		
+
 
 		if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
@@ -50,7 +50,7 @@ ORIGINALLY CREATED ON: 06/30/2017
 			<!-- submit button -->
 			<input type="submit" name="submit" value="Submit">
 		</form>
-        
+
  	</div>
  	<div id="footer">
  		<div>

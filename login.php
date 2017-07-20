@@ -5,28 +5,23 @@ File Name: display.php
 ORIGINALLY CREATED ON: 06/30/2017
 -->
 <?php
+    $err = "";
     $counter = 0;
     session_start();
 
-    $servername = "localhost";
-    $username = "username";
-    $password = "password";
+    $dsn = 'mysql:host=localhost;dbname=cahuizar_db';
+    $username = "cahuizar";
+    $password = "server123";
+    $conn = new PDO($dsn, $username, $password);
 
-    // Create connection
-    $conn = new mysqli($servername, $username, $password);
-
-    // Check connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    } 
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if($counter <= 5) {
             $email = filter_input(INPUT_POST, 'email');
             $password = filter_input(INPUT_POST, 'password');
 
-            
-            $sql = "SELECT fName FROM Users WHERE email='. $email .' AND password='. $password .'";
+
+            $sql = "SELECT fName FROM User WHERE email='. $email .' AND password='. $password .'";
             $result = $conn->query($sql);
             $count = mysqli_num_rows($result);
             if($count == 1) {
@@ -37,7 +32,7 @@ ORIGINALLY CREATED ON: 06/30/2017
                 $counter += 1;
             }
         } else {
-            $err = "You have been locked out of your account"
+            $err = "You have been locked out of your account";
         }
     }
 
@@ -64,12 +59,15 @@ ORIGINALLY CREATED ON: 06/30/2017
  		</ul>
  	</div>
  	<div id="body">
-	 	<h1>Login</h1>
+        <h1><span>Login</span></h1>
 		<form method="post">
+            <label>Email: </label><br /><input type="email" name="email" id="email" /><br />
+            <label>Password: </label><br /><input type="password" name="password" id="password" /><br />
+            <span class="error"><?php echo $err;?></span>
 			<!-- submit button -->
 			<input type="submit" name="submit" value="Submit">
 		</form>
-        
+
  	</div>
  	<div id="footer">
  		<div>
