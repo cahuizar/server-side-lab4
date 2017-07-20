@@ -1,13 +1,18 @@
 <!--
-TITLE: Lab 3
+TITLE: login
 AUTHOR: Carlos Huizar
-File Name: display.php
+File Name: login.php
 ORIGINALLY CREATED ON: 06/30/2017
 -->
 <?php
     $err = "";
-    $counter = 0;
     session_start();
+
+	$counter = $_SESSION['counter'];
+	$counter = intval($counter);
+	if($counter = null) {
+		$counter = 0;
+	}
 
     $dsn = 'mysql:host=localhost;dbname=cahuizar_db';
     $username = "cahuizar";
@@ -21,15 +26,21 @@ ORIGINALLY CREATED ON: 06/30/2017
             $password = filter_input(INPUT_POST, 'password');
 
 
-            $sql = "SELECT fName FROM User WHERE email='. $email .' AND password='. $password .'";
-            $result = $conn->query($sql);
+            $sql = "SELECT fName FROM User WHERE email=':email' AND password=':password'";
+            $result = $conn->prepare($sql);
+			$result->bindValue(":email", $email);
+			$result->bindValue(":password", $password);
+			$result->execute();
             $count = mysqli_num_rows($result);
+			$result->closeCursor();
             if($count == 1) {
-                $_SESSION['email'] = $email;
+                 $_SESSION['email'] = $email;
                  $_SESSION['isLoggedIn'] = "yes";
                 header("Location: dashboard.php");
             } else {
                 $counter += 1;
+				$_SESSION['counter'] = $counter;
+				$err = "The email and password combination is incorrect";
             }
         } else {
             $err = "You have been locked out of your account";
@@ -52,11 +63,6 @@ ORIGINALLY CREATED ON: 06/30/2017
  		<a href="../index.html" class="logo">
  			<img src="images/logo.jpg" alt="">
  		</a>
- 		<ul id="navigation">
- 			<li class="selected">
- 				<a href="lab1.php">Carlos Huizar</a>
- 			</li>
- 		</ul>
  	</div>
  	<div id="body">
         <h1><span>Login</span></h1>
@@ -66,6 +72,8 @@ ORIGINALLY CREATED ON: 06/30/2017
             <span class="error"><?php echo $err;?></span>
 			<!-- submit button -->
 			<input type="submit" name="submit" value="Submit">
+			<br /><br />
+			<a href = 'lab4.php'>Go to Register</a>
 		</form>
 
  	</div>

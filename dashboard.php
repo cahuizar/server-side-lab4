@@ -1,28 +1,9 @@
 <!--
 TITLE: Lab 3
 AUTHOR: Carlos Huizar
-File Name: display.php
+File Name: dashboard.php
 ORIGINALLY CREATED ON: 06/30/2017
 -->
-<?php
-	session_start();
-	if($_SESSION['isLoggedIn'] == "yes") {
-
-		$email = $_SESSION['email'];
-
-
-		if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
-			// remove all from session from session
-			session_destroy();
-			header("Location: login.php");
-
-		}
-	} else {
-		header("Location: login.php");
-	}
-
- ?>
  <!doctype html>
 
  <html>
@@ -34,21 +15,45 @@ ORIGINALLY CREATED ON: 06/30/2017
  	<link rel="stylesheet" type="text/css" href="css/mobile.css" media="screen and (max-width : 568px)">
  </head>
  <body>
+	<?php
+		session_start();
+		$dsn = 'mysql:host=localhost;dbname=cahuizar_db';
+		$username = "cahuizar";
+		$password = "server123";
+		$conn = new PDO($dsn, $username, $password);
+		if($_SESSION['isLoggedIn'] == "yes") {
+
+			$email = $_SESSION['email'];
+			$sql = "SELECT fName FROM User where email = ':email'";
+			$statement = $conn->prepare($sql);
+			$statement->execute();
+			$row = $statement->fetchAll();
+			$statement->closeCursor();
+			$fName = $row['fName'];
+
+
+			if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+				// remove all from session from session
+				session_destroy();
+				header("Location: login.php");
+
+			}
+		} else {
+			header("Location: login.php");
+		}
+
+	?>
  	<div id="header">
  		<a href="../index.html" class="logo">
  			<img src="images/logo.jpg" alt="">
  		</a>
- 		<ul id="navigation">
- 			<li class="selected">
- 				<a href="lab1.php">Carlos Huizar</a>
- 			</li>
- 		</ul>
  	</div>
  	<div id="body">
 	 	<h1>Welcome <span><?php echo htmlspecialchars($fName); ?></span><span><?php echo htmlspecialchars($lName); ?></span></h1>
 		<form method="post">
 			<!-- submit button -->
-			<input type="submit" name="submit" value="Submit">
+			<input type="submit" name="submit" value="Logout">
 		</form>
 
  	</div>

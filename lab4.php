@@ -2,7 +2,7 @@
 <!--
 TITLE: Lab 4
 AUTHOR: Carlos Huizar
-File Name: lab3.php
+File Name: lab4.php
 ORIGINALLY CREATED ON: 07/16/2017
 -->
 <html>
@@ -107,8 +107,8 @@ ORIGINALLY CREATED ON: 07/16/2017
 				$departmentId->bindValue(":department", $department);
 				$departmentId->execute();
 				$temp = $departmentId->fetchAll();
-				$id = "MENS";
 				$departmentId->closeCursor();
+				$id = $temp['departmentId'];
 				$sql = "INSERT INTO User (email, password, fName, lName, departmentId) VALUES (:email, :password, :fName, :lName, :departmentId)";
 				$statement = $conn->prepare($sql);
 				$statement->bindValue(":email", $email);
@@ -129,11 +129,6 @@ ORIGINALLY CREATED ON: 07/16/2017
 		<a href="index.html" class="logo">
 			<img src="images/logo.jpg" alt="">
 		</a>
-		<ul id="navigation">
-			<li class="selected">
-				<a href="../index.html">Carlos Huizar</a>
-			</li>
-		</ul>
 	</div>
 	<div id="body">
 		<h1><span>let's keep in touch</span></h1>
@@ -156,6 +151,8 @@ ORIGINALLY CREATED ON: 07/16/2017
 
 			<!-- submit button -->
 			<input type="submit" name="submit" value="Submit">
+			<br /><br />
+			<a href = 'login.php'>Go to Login</a>
 		</form>
 	</div>
 	<div id="footer">
