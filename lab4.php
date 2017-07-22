@@ -15,18 +15,17 @@ ORIGINALLY CREATED ON: 07/16/2017
 </head>
 <body>
 	<?php
+		// include database and customer
 		require('customer.php');
+		require('Database.php');
 		$fNameErr = $lNameErr = $emailErr = $emailConfirmErr = $passwordErr = $passwordConfirmErr = "";
 		$customer = new Customer();
 
-		$dsn = 'mysql:host=localhost;dbname=cahuizar_db';
-		$username = "cahuizar";
-		$password = "server123";
-		$conn = new PDO($dsn, $username, $password);
-
-
+		// set up connection to database
+		$db = Database::getDB();
+		// retrieve the departments from datbase
 		$sql = "SELECT departmentName FROM Department";
-		$depName = $conn->prepare($sql);
+		$depName = $db->prepare($sql);
 		$depName->execute();
 		$rows = $depName->fetchAll();
 		$depName->closeCursor();
@@ -101,26 +100,21 @@ ORIGINALLY CREATED ON: 07/16/2017
 
 			// do the following if no errors are found on the form
 			if ($errorFound == false){
+				$counter = 0;
 				$department = $customer->getDepartment();
-				$sql = "SELECT departmentId FROM Department WHERE departmentName = :department";
-				$departmentId = $conn->prepare($sql);
-				$departmentId->bindValue(":department", $department);
-				$departmentId->execute();
-				$temp = $departmentId->fetchAll();
-				$departmentId->closeCursor();
-				$id = $temp['departmentId'];
-				$sql = "INSERT INTO User (email, password, fName, lName, departmentId) VALUES (:email, :password, :fName, :lName, :departmentId)";
-				$statement = $conn->prepare($sql);
-				$statement->bindValue(":email", $email);
-				$statement->bindValue(":password", $password);
-				$statement->bindValue(":fName", $fName);
-				$statement->bindValue(":lName", $lName);
-				$statement->bindValue(":departmentId", $id);
-				$statement->execute();
-        		$statement->closeCursor();
+				// retreive the id from the picked department
+				$query = "SELECT departmentId as id FROM Department
+						  WHERE departmentName = ?";
+				$statement = $db->prepare($query);
+		  	    $statement->execute(array($department));
+		  	   	$row = $statement->fetch(PDO::FETCH_OBJ);
+		  	   	$id = $row->id;
+				// store new user
+				$query = "INSERT INTO User (email, password, fName, lName, departmentId, counter) VALUES (?, ?, ?, ?, ?, ?)";
+				$statement = $db->prepare($query);
+                $statement->execute(array($email, $password, $fName, $lName, $id, $counter));
 				// go to login.php
 				header("Location: login.php");
-				exit();
 			}
 
 		}
@@ -148,7 +142,6 @@ ORIGINALLY CREATED ON: 07/16/2017
     			}
              ?>
             </select><br  />
-
 			<!-- submit button -->
 			<input type="submit" name="submit" value="Submit">
 			<br /><br />

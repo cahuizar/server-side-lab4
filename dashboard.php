@@ -16,31 +16,34 @@ ORIGINALLY CREATED ON: 06/30/2017
  </head>
  <body>
 	<?php
+        require('Database.php');
 		session_start();
-		$dsn = 'mysql:host=localhost;dbname=cahuizar_db';
-		$username = "cahuizar";
-		$password = "server123";
-		$conn = new PDO($dsn, $username, $password);
-		if($_SESSION['isLoggedIn'] == "yes") {
-
-			$email = $_SESSION['email'];
-			$sql = "SELECT fName FROM User where email = ':email'";
-			$statement = $conn->prepare($sql);
-			$statement->execute();
-			$row = $statement->fetchAll();
-			$statement->closeCursor();
-			$fName = $row['fName'];
-
-
+		$db = Database::getDB();
+        $loggedIn = $_SESSION['isLoggedIn'];
+        $email = $_SESSION['email'];
+        // allow access if the user is logged in
+		if($loggedIn == "yes") {
+            // retrive the first name from database
+            $query = "SELECT fName as c FROM User where email = ?";
+            $statement = $db->prepare($query);
+            $statement->execute(array($email));
+            $row = $statement->fetch(PDO::FETCH_OBJ);
+            $fName = $row->c;
+            // retrive the last name from database
+            $query = "SELECT lName as c FROM User where email = ?";
+            $statement = $db->prepare($query);
+            $statement->execute(array($email));
+            $row = $statement->fetch(PDO::FETCH_OBJ);
+            $lName = $row->c;
+            // logout, kill session and send user to login page
 			if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
 				// remove all from session from session
 				session_destroy();
-				header("Location: login.php");
-
+				header("Location: login.php?l=q");
 			}
+            // redirect back to login and display error message
 		} else {
-			header("Location: login.php");
+			header("Location: login.php?l=r");
 		}
 
 	?>
@@ -50,7 +53,7 @@ ORIGINALLY CREATED ON: 06/30/2017
  		</a>
  	</div>
  	<div id="body">
-	 	<h1>Welcome <span><?php echo htmlspecialchars($fName); ?></span><span><?php echo htmlspecialchars($lName); ?></span></h1>
+	 	<h2>Welcome <span><?php echo htmlspecialchars($fName); ?></span> 	&nbsp;<span><?php echo htmlspecialchars($lName); ?></span></h2>
 		<form method="post">
 			<!-- submit button -->
 			<input type="submit" name="submit" value="Logout">
